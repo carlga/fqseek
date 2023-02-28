@@ -1,0 +1,33 @@
+name: fqseek 
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python >3.6
+  - mamba
+  - snakemake-minimal >7.18
+  - tabulate <=0.8.10
+  - numpy >=1.17.2
+  - ruamel.yaml >=0.17
+  - pandas >=1.0.0
+  - plotly >=5.10.0
+  - seqkit >=2.0.0
+  - gget >=0.3.9
+  - ffq >=0.3.0
+  - fastqc
+  - fastp
+  - ucsc-gtftogenepred
+  - ucsc-genepredtobed
+  - rseqc
+  - kraken2
+  - bracken
+  - krakentools
+  - krona
+  - hisat2
+  - kallisto
+  - sortmerna
+  - samtools
+  - bedtools
+  - subread
+  - multiqc
