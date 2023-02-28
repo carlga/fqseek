@@ -1,2 +1,13 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Snakemake files as Python
+*Snakefile linguist-language=Python
+*snakefile linguist-language=Python
+*.smk linguist-language=Python
+*.rule linguist-language=Python
+*.yaml linguist-language=Python
+*.yml linguist-language=Python
+
+# Ignore .html files
+*.html linguist-detectable=false
