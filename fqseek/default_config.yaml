@@ -1,0 +1,88 @@
+#      ___                      _          
+#     / __)                    | |         
+#    | |__ ____  ___  ____ ____| |  _      
+#    |  __) _  |/___)/ _  ) _  ) | / )     
+#    | | | | | |___ ( (/ ( (/ /| |< (      
+#    |_|  \_|| (___/ \____)____)_| \_)     
+#            |_|                           
+
+
+# ---------------------------------
+# Recording for configuration file
+# ---------------------------------
+records:
+  generated:
+  last_updated:
+  filepath:
+
+
+# -------------------
+# init options
+# -------------------
+init:
+  hisat2_ref:
+  hisat2_index_base:
+  hisat2_gtf:
+  sortmerna_ref:
+  kallisto_ref:
+  kallisto_index:
+  kraken2_db_type:
+  bracken_read_len:
+  outdir:
+  jobs:
+  profile:
+
+
+# -------------------
+# getref options
+# -------------------
+getref:
+  release: # ensembl release
+  species:
+  which:
+  outdir:
+  jobs:
+  profile:
+
+
+# -------------------
+# getfq options
+# -------------------
+getfq:
+  ids:
+  outdir:
+  jobs:
+  profile:
+
+
+# -------------------
+# runqc options
+# -------------------
+runqc:
+  indir:
+  number:
+  seed:
+  fastp_opt:
+  hisat2_ref:
+  gtf:
+  kraken2_db:
+  outdir:
+  jobs:
+  profile:
+
+
+# -------------------
+# run_rnaseq options
+# -------------------
+run_rnaseq:
+  indir:
+  fastp_opt:
+  rRNA_ref:
+  hisat2_ref:
+  hisat2_opt:
+  kallisto_ref:
+  kallisto_opt:
+  gtf:
+  outdir:
+  jobs:
+  profile:
