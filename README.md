@@ -25,7 +25,7 @@ For more details and use case examples check the [documentation]().
 
 ## Installation
 
-`fqseeq` can be installed via [conda](http://anaconda.org/) from the 
+`fqseek` can be installed via [conda](http://anaconda.org/) from the 
 [bioconda](https://bioconda.github.io/) channel:
 
 ```bash
