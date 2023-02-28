@@ -58,10 +58,11 @@ rule download_fq:
     log: "logs/" + TIMESTAMP + "_{filename}_download_fq.log"
     threads: 1
     run:
-        shell(" echo 'Downloading '{link}'...' > {log} ")
-        
         with open(input.tmp_link, "r") as f:
             link = f.readline().strip()
+        
+        shell(" echo 'Downloading '{link}'...' > {log} ")
+        
         shell(" curl {link} --remote-name --silent ")
         
         shell(" echo 'Finished downloading '{link}'' >> {log} ")
