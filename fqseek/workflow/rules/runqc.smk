@@ -395,7 +395,7 @@ if RUNQC_BIOTYPE_COMPOSITION:
             threads: HISAT2_THREADS
             # resources: cpus=20, mem_mb=40000, time_min=60
             run:
-                strandedness = check_strandedness(input.infer_experiment, PAIRED)
+                strandedness = check_strandedness(input['infer_experiment'], PAIRED)
 
                 shell(" echo 'Inferred strandedness for '{wildcards.name}': {strandedness}' > {log} ")
 
@@ -532,7 +532,7 @@ if RUNQC_BIOTYPE_COMPOSITION:
             threads: HISAT2_THREADS
             # resources: cpus=20, mem_mb=40000, time_min=60
             run:
-                strandedness = check_strandedness(input.infer_experiment, PAIRED)
+                strandedness = check_strandedness(input['infer_experiment'], PAIRED)
 
                 shell(" echo 'Inferred strandedness for '{wildcards.name}': {strandedness}' > {log} ")
 
@@ -631,7 +631,7 @@ if RUNQC_BIOTYPE_COMPOSITION:
         run:
             pe = '-p -C -B' if PAIRED else ''
 
-            strandedness = check_strandedness(input.infer_experiment, PAIRED)
+            strandedness = check_strandedness(input['infer_experiment'], PAIRED)
 
             shell(" echo 'Using inferred strandedness for '{NAMES[0]}': {strandedness}' > {log} ")
 
