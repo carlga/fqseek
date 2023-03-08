@@ -85,7 +85,7 @@ rule subset_fq:
     input:
         fq = config['runqc']['indir'] + "/{name}{read}" + EXT
     output:
-        fq_subs = "fq_raw_sampled/{name}_subs{read}.fastq.gz"
+        fq_subs = "fq_raw_sampled/{name}_subs{read,.*}.fastq.gz"
     params:
         number = config['runqc']['number'],
         seed = config['runqc']['seed']
