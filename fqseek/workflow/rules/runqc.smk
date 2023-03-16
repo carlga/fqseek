@@ -786,10 +786,19 @@ if RUNQC_SPECIES_COMPOSITION:
 
             printf "%s\n" {NAMES} \
                 | xargs -I{{}} \
+                    cp bracken/{{}}_kraken2_bracken_report.txt bracken/{{}}_kraken2_bracken_report.tmp
+            
+            # fix for kreport2krona.py
+            echo -e '0\t0\t0\tX\t0\t  X' | tee -a bracken/*_kraken2_bracken_report.tmp &> /dev/null
+
+            printf "%s\n" {NAMES} \
+                | xargs -I{{}} \
                     kreport2krona.py \
-                        -r bracken/{{}}_kraken2_bracken_report.txt \
+                        -r bracken/{{}}_kraken2_bracken_report.tmp \
                         -o {params.outdir}/{{}}.txt \
                         &>> {log}
+            
+            rm bracken/*_kraken2_bracken_report.tmp
 
             printf "%s\n" {NAMES} \
                 | xargs -I{{}} \
