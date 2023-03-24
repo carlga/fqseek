@@ -212,7 +212,7 @@ else:
             if params['rRNA_ref']:
                 shell(
                     '''
-                    echo 'Removing rRNA reads from '{wildcards.name}'...' &>> {params.logfile}
+                    echo 'Removing rRNA reads from '{wildcards.name}'...' >> {log}
 
                     sortmerna \
                         --threads {threads} \
