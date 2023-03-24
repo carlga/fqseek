@@ -564,7 +564,8 @@ def run_rnaseq_config_set(config, args):
         )
     
     if config['run_rnaseq']['profile'] is None:
-        config['run_rnaseq']['profile'] = os.path.abspath(args.profile)
+        if args.profile:
+            config['run_rnaseq']['profile'] = os.path.abspath(args.profile)
     else:
         logger.warning(
             f"Profile '{config['run_rnaseq']['profile']}' "
