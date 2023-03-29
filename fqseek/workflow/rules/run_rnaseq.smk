@@ -414,7 +414,7 @@ if PAIRED:
 
                     rm {params.outdir}/*.tmp
 
-                    echo 'Finished sppliting bam for '{wildcards.name}'' >> {log}
+                    echo 'Finished splitting bam for '{wildcards.name}'' >> {log}
                     '''
                 )
     
@@ -582,7 +582,7 @@ else:
                         {params.outdir}/{wildcards.name}_{read2}.bam \
                         &>> {log}
 
-                    echo 'Finished sppliting bam for '{wildcards.name}'' >> {log}
+                    echo 'Finished splitting bam for '{wildcards.name}'' >> {log}
                     '''
                 )
 
@@ -645,7 +645,7 @@ rule feature_counts:
     threads: AVAIL_THREADS
     # resources: cpus=10, mem_mb=20000, time_min=300
     run:
-        pe = '-p -C -B' if PAIRED else ''
+        pe = '-p --countReadPairs -C -B' if PAIRED else ''
 
         featurecounts_strandedness = '-s 0'
         if STRANDED in ['F','FR']:

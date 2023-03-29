@@ -629,7 +629,7 @@ if RUNQC_BIOTYPE_COMPOSITION:
         threads: AVAIL_THREADS
         # resources: cpus=10, mem_mb=20000, time_min=300
         run:
-            pe = '-p -C -B' if PAIRED else ''
+            pe = '-p --countReadPairs -C -B' if PAIRED else ''
 
             strandedness = check_strandedness(input['infer_experiment'], PAIRED)
 

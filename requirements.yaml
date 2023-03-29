@@ -29,5 +29,5 @@ dependencies:
   - sortmerna
   - samtools
   - bedtools
-  - subread
+  - subread >=2.0.2
   - multiqc
