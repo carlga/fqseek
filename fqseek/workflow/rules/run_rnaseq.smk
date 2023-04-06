@@ -412,7 +412,7 @@ if PAIRED:
                         &>> {log}
 
 
-                    rm {params.outdir}/*.tmp
+                    rm {params.outdir}/{wildcards.name}*.tmp
 
                     echo 'Finished splitting bam for '{wildcards.name}'' >> {log}
                     '''
