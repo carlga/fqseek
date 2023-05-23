@@ -383,7 +383,7 @@ if RUNQC_BIOTYPE_COMPOSITION:
                 fq2 = "fq_preprocessed/{name}_subs_preproc_2.fastq.gz",
                 infer_experiment = "rseqc/{name}_rseqc_inferexperiment.txt"
             output:
-                sam = "hisat2_aligned/{name}.sam",
+                sam = temp("hisat2_aligned/{name}.sam"),
                 bam = "hisat2_aligned/{name}.bam",
                 bam_idx = "hisat2_aligned/{name}.bam.bai",
                 summary = "hisat2_aligned/{name}_hisat2_summary.txt",
@@ -520,7 +520,7 @@ if RUNQC_BIOTYPE_COMPOSITION:
                 fq = "fq_preprocessed/{name}_subs_preproc.fastq.gz",
                 infer_experiment = "rseqc/{name}_rseqc_inferexperiment.txt"
             output:
-                sam = "hisat2_aligned/{name}.sam",
+                sam = temp("hisat2_aligned/{name}.sam"),
                 bam = "hisat2_aligned/{name}.bam",
                 bam_idx = "hisat2_aligned/{name}.bam.bai",
                 summary = "hisat2_aligned/{name}_hisat2_summary.txt",

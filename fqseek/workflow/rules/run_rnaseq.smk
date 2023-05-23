@@ -248,7 +248,7 @@ if PAIRED:
             fq1 = "fq_preprocessed/{name}_preproc_1.fastq.gz",
             fq2 = "fq_preprocessed/{name}_preproc_2.fastq.gz"
         output:
-            sam = "hisat2_aligned/{name}.sam",
+            sam = temp("hisat2_aligned/{name}.sam"),
             bam = "hisat2_aligned/{name}.bam",
             bam_idx = "hisat2_aligned/{name}.bam.bai",
             summary = "hisat2_aligned/{name}_hisat2_summary.txt",
@@ -468,7 +468,7 @@ else:
         input:
             fq = "fq_preprocessed/{name}_preproc.fastq.gz"
         output:
-            sam = "hisat2_aligned/{name}.sam",
+            sam = temp("hisat2_aligned/{name}.sam"),
             bam = "hisat2_aligned/{name}.bam",
             bam_idx = "hisat2_aligned/{name}.bam.bai",
             summary = "hisat2_aligned/{name}_hisat2_summary.txt",
