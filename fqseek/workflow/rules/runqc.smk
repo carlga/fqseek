@@ -13,11 +13,11 @@ from utils import check_strandedness, plot_biotype_composition
 # Set variables
 PROJID = os.path.basename(config['runqc']['indir'])
 FILES = glob.glob(os.path.join(config['runqc']['indir'], '*.f*q.gz'))
-EXT = re.search(r'\w+(.f(ast)?q.gz)', FILES[0]).group(1)
+EXT = re.search(r'[-\w]+(.f(ast)?q.gz)', FILES[0]).group(1)
 try:
-    NAMES = list(set([re.search(r'(\w+)(?=_[12])_[12].f(ast)?q.gz', x).group(1) for x in FILES]))
+    NAMES = list(set([re.search(r'([-\w]+)(?=_[12])_[12].f(ast)?q.gz', x).group(1) for x in FILES]))
 except AttributeError:
-    NAMES = list(set([re.search(r'(\w+).f(ast)?q.gz', x).group(1) for x in FILES]))
+    NAMES = list(set([re.search(r'([-\w]+).f(ast)?q.gz', x).group(1) for x in FILES]))
 PAIRED = False if len(NAMES) == len(FILES) else True
 READS = ['_1','_2'] if PAIRED else ['']
 
