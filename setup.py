@@ -19,7 +19,7 @@ setup(
     ),
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=["fqseek"],
+    packages=["fqseek", "fqseek.workflow.rules", "fqseek.workflow.utils"],
     package_data={"fqseek" : ["workflow/*/*"]},
     include_package_data=True,
     zip_safe=False,
