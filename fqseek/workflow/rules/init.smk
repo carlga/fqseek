@@ -6,21 +6,34 @@ from datetime import datetime
 TIMESTAMP = datetime.now().strftime("%Y%m%d")
 
 # URLs for data retrieval
-SORTMERNADB_LINK = 'https://github.com/biocore/sortmerna/releases/download/v4.3.4/database.tar.gz'
+RIBORNA_LINK = 'https://github.com/biocore/sortmerna/releases/download/v4.3.4/database.tar.gz'
+EXCLUSIONLIST_LINKS = [
+    'https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/ce10-blacklist.v2.bed.gz',
+    'https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/ce11-blacklist.v2.bed.gz',
+    'https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/dm3-blacklist.v2.bed.gz',
+    'https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/dm6-blacklist.v2.bed.gz',
+    'https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/hg19-blacklist.v2.bed.gz',
+    'https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/hg38-blacklist.v2.bed.gz',
+    'https://raw.githubusercontent.com/Boyle-Lab/Blacklist/master/lists/mm10-blacklist.v2.bed.gz'
+]
 KRAKEN2_STANDARD16_LINK = 'https://genome-idx.s3.amazonaws.com/kraken/k2_standard_16gb_20221209.tar.gz'
 KRAKEN2_PLUSPFP16_LINK = 'https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_16gb_20221209.tar.gz'
 
 # Set targets
 RUN_RULES = []
-INIT_HISAT2 = INIT_SORTMERNADB = INIT_KALLISTO = INIT_KRAKEN2 = None
+INIT_HISAT2 = INIT_RIBORNA = INIT_EXCLUSIONLIST = INIT_KALLISTO = INIT_KRAKEN2 = None
 
 if config["init"]["hisat2_ref"] and config["init"]["hisat2_index_base"]:
     INIT_HISAT2 = 'hisat2_index/' + config['init']['hisat2_index_base'] + '.1.ht2'
     RUN_RULES.append(INIT_HISAT2)
 
-if config["init"]["sortmerna_ref"]:
-    INIT_SORTMERNADB = 'sortmerna_rRNA_ref/rRNA_ref_complete'
-    RUN_RULES.append(INIT_SORTMERNADB)
+if config["init"]["rrna_ref"]:
+    INIT_RIBORNA = 'rRNA_ref/rRNA_ref_complete'
+    RUN_RULES.append(INIT_RIBORNA)
+
+if config["init"]["exclusion_lists"]:
+    INIT_EXCLUSIONLIST = 'exclusion_lists/exclusion_bed_files_complete'
+    RUN_RULES.append(INIT_EXCLUSIONLIST)
 
 if config["init"]["kallisto_ref"] and config["init"]["kallisto_index"]:
     INIT_KALLISTO = 'kallisto_index/' + config['init']['kallisto_index']
@@ -38,10 +51,14 @@ if config["init"]["kraken2_db_type"] and config["init"]["bracken_read_len"]:
 
 # Distribute allocated jobs/cores
 AVAIL_THREADS = config['init']['jobs']
-INIT_HISAT2_THREADS = INIT_SORTMERNADB_THREADS = INIT_KALLISTO_THREADS = INIT_KRAKEN2_THREADS = 0
+INIT_HISAT2_THREADS = INIT_RIBORNA_THREADS = INIT_EXCLUSIONLIST_THREADS = INIT_KALLISTO_THREADS = INIT_KRAKEN2_THREADS = 0
 
-if INIT_SORTMERNADB:
-    INIT_SORTMERNADB_THREADS = 1
+if INIT_RIBORNA:
+    INIT_RIBORNA_THREADS = 1
+    AVAIL_THREADS -= 1
+
+if INIT_EXCLUSIONLIST:
+    INIT_EXCLUSIONLIST_THREADS = 1
     AVAIL_THREADS -= 1
 
 if INIT_KALLISTO:
@@ -156,26 +173,26 @@ elif INIT_HISAT2:
 
 
 #
-# Download SortMeRNA rRNA reference files
+# Download rRNA reference files from SortMeRNA
 #
-if INIT_SORTMERNADB:
+if INIT_RIBORNA:
 
-    rule download_sortmerna_db:
+    rule download_rrna_ref:
             """
-            Retrieves sortmerna rRNA reference database.
+            Retrieves rRNA reference files.
             """
             output:
-                complete = temp(INIT_SORTMERNADB)
+                complete = temp(INIT_RIBORNA)
             params:
-                link = SORTMERNADB_LINK,
-                filename = os.path.basename(SORTMERNADB_LINK),
-                outdir = 'sortmerna_rRNA_ref'
-            log: "logs/" + TIMESTAMP + "_download_sortmerna_db.log"
-            threads: INIT_SORTMERNADB_THREADS
+                link = RIBORNA_LINK,
+                filename = os.path.basename(RIBORNA_LINK),
+                outdir = 'rRNA_ref'
+            log: "logs/" + TIMESTAMP + "_download_rRNA_ref.log"
+            threads: INIT_RIBORNA_THREADS
             # resources: cpus=4, mem_mb=4000, time_min=200
             shell:
                 '''
-                echo 'Downloading sortmerna rRNA reference database...' > {log}
+                echo 'Downloading rRNA reference files...' > {log}
 
                 curl -L {params.link} --remote-name --silent
                 tar -zxf {params.filename} -C {params.outdir}
@@ -185,6 +202,43 @@ if INIT_SORTMERNADB:
 
                 touch {output.complete}
                 '''
+
+
+#
+# Download reference exclusion list files
+#
+if INIT_EXCLUSIONLIST:
+
+    rule download_exclusionlist_files:
+            """
+            Retrieves genomic region exclusion bed files.
+            """
+            output:
+                complete = temp(INIT_EXCLUSIONLIST)
+            params:
+                links = EXCLUSIONLIST_LINKS,
+                filename = os.path.basename(RIBORNA_LINK),
+                outdir = 'exclusion_lists'
+            log: "logs/" + TIMESTAMP + "_download_exclusion_lists.log"
+            threads: INIT_EXCLUSIONLIST_THREADS
+            # resources: cpus=4, mem_mb=4000, time_min=200
+            run:
+                shell(" echo 'Downloading exclusion lists...' > {log} ")
+
+                for link in params.links:
+                    filename = os.path.basename(link)
+                    new_filename = os.path.splitext(filename)[0]
+
+                    shell(
+                        '''
+                        curl -L {link} --remote-name --silent
+                        gunzip {filename}
+                        mv {new_filename} {params.outdir}/{new_filename}
+                        '''
+                    )
+                
+                shell(" echo 'Finished downloading exclusion lists' > {log} ")
+                shell(" touch {output.complete} ")
 
 
 #

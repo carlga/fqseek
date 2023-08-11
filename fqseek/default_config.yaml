@@ -23,7 +23,8 @@ init:
   hisat2_ref:
   hisat2_index_base:
   hisat2_gtf:
-  sortmerna_ref:
+  rrna_ref:
+  exclusion_lists:
   kallisto_ref:
   kallisto_index:
   kraken2_db_type:
@@ -77,7 +78,7 @@ runqc:
 run_rnaseq:
   indir:
   fastp_opt:
-  rRNA_ref:
+  removal_ref:
   hisat2_ref:
   hisat2_opt:
   kallisto_ref:

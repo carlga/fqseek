@@ -140,11 +140,18 @@ def main():
         help="Path to reference annotation file."
     )
     init_parser.add_argument(
-        "--sortmerna_ref",
+        "--rrna_ref",
         action='store_true',
         default=None,
         required=False,
         help="Downloads rRNA reference files to output directory."
+    )
+    init_parser.add_argument(
+        "--exclusion_lists",
+        action='store_true',
+        default=None,
+        required=False,
+        help="Downloads exclusion list files to output directory."
     )
     init_parser.add_argument(
         "--kallisto_ref",
@@ -503,11 +510,11 @@ def main():
     )
     run_rnaseq_parser.add_argument(
         "-r",
-        "--rRNA_ref",
+        "--removal_ref",
         default=None,
         type=str,
         required=False,
-        help="Path to rRNA reference file for removal with sortmerna."
+        help="Path to reference file for read removal."
     )
     run_rnaseq_parser.add_argument(
         "-x",

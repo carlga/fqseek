@@ -39,11 +39,19 @@ def init_config_set(config, args):
             "is set in configuration! Using..."
         )
     
-    if config['init']['sortmerna_ref'] is None:
-        config['init']['sortmerna_ref'] = args.sortmerna_ref
+    if config['init']['rrna_ref'] is None:
+        config['init']['rrna_ref'] = args.rrna_ref
     else:
         logger.warning(
-            f"Download rRNA reference '{config['init']['sortmerna_ref']}' "
+            f"Download rRNA reference '{config['init']['rrna_ref']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['init']['exclusion_lists'] is None:
+        config['init']['exclusion_lists'] = args.exclusion_lists
+    else:
+        logger.warning(
+            f"Download exclusion lists '{config['init']['exclusion_lists']}' "
             "is set in configuration! Using..."
         )
     
@@ -495,12 +503,12 @@ def run_rnaseq_config_set(config, args):
             "are set in configuration! Using..."
         )
 
-    if config['run_rnaseq']['rRNA_ref'] is None:
-        if args.rRNA_ref:
-            config['run_rnaseq']['rRNA_ref'] = os.path.abspath(args.rRNA_ref)
+    if config['run_rnaseq']['removal_ref'] is None:
+        if args.removal_ref:
+            config['run_rnaseq']['removal_ref'] = os.path.abspath(args.removal_ref)
     else:
         logger.warning(
-            f"rRNA reference '{config['run_rnaseq']['rRNA_ref']}' "
+            f"Read removal reference '{config['run_rnaseq']['removal_ref']}' "
             "is set in configuration! Using..."
         )
     
@@ -604,10 +612,10 @@ def run_rnaseq_config_check(config):
                 logger.error(f"fastp option '{opt}' is not allowed.")
                 sys.exit(1)
     
-    # rRNA reference
-    if config['run_rnaseq']['rRNA_ref']:
-        if not os.path.exists(config['run_rnaseq']['rRNA_ref']):
-            logger.error(f"rRNA reference file '{config['run_rnaseq']['rRNA_ref']}' not found.")
+    # Read removal reference
+    if config['run_rnaseq']['removal_ref']:
+        if not os.path.exists(config['run_rnaseq']['removal_ref']):
+            logger.error(f"Read removal reference file '{config['run_rnaseq']['removal_ref']}' not found.")
             sys.exit(1)
 
     # HISAT2 index and options

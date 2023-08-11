@@ -114,7 +114,7 @@ if PAIRED:
             html = "fq_preprocessed/{name}_fastp.html"
         params:
             fastp_opt = config['run_rnaseq']['fastp_opt'],
-            rRNA_ref = config['run_rnaseq']['rRNA_ref'],
+            removal_ref = config['run_rnaseq']['removal_ref'],
             outdir = "fq_preprocessed"
         log: "logs/" + TIMESTAMP + "_{name}_preprocess_fq.log"
         threads: FASTP_THREADS
@@ -138,38 +138,38 @@ if PAIRED:
                 echo 'Finished processing reads from '{wildcards.name}'' >> {log}
                 '''
             )
-            if params['rRNA_ref']:
+            if params['removal_ref']:
                 shell(
                     '''
-                    echo 'Removing rRNA reads from '{wildcards.name}'...' >> {log}
+                    echo 'Removing aligned reads from '{wildcards.name}'...' >> {log}
 
                     sortmerna \
                         --threads {threads} \
-                        --ref {params.rRNA_ref} \
+                        --ref {params.removal_ref} \
                         --reads {output.fq1_preproc} \
                         --reads {output.fq2_preproc} \
                         --workdir {params.outdir}/sortmerna \
                         --kvdb {params.outdir}/sortmerna/{wildcards.name}_kvdb \
                         --readb {params.outdir}/sortmerna/{wildcards.name}_readb \
                         --fastx \
-                        --aligned {params.outdir}/sortmerna/out/{wildcards.name}_rRNA \
-                        --other {params.outdir}/{wildcards.name}_no_rRNA \
+                        --aligned {params.outdir}/sortmerna/out/{wildcards.name}_removed \
+                        --other {params.outdir}/{wildcards.name} \
                         --paired_in \
                         --out2 \
                         &>> {log}
 
-                    mv {params.outdir}/sortmerna/out/{wildcards.name}_rRNA_fwd.fq.gz \
-                        {params.outdir}/sortmerna/out/{wildcards.name}_rRNA_1.fastq.gz
-                    mv {params.outdir}/sortmerna/out/{wildcards.name}_rRNA_rev.fq.gz \
-                        {params.outdir}/sortmerna/out/{wildcards.name}_rRNA_2.fastq.gz
+                    mv {params.outdir}/sortmerna/out/{wildcards.name}_removed_fwd.fq.gz \
+                        {params.outdir}/sortmerna/out/{wildcards.name}_removed_1.fastq.gz
+                    mv {params.outdir}/sortmerna/out/{wildcards.name}_removed_rev.fq.gz \
+                        {params.outdir}/sortmerna/out/{wildcards.name}_removed_2.fastq.gz
 
-                    mv {params.outdir}/{wildcards.name}_no_rRNA_fwd.fq.gz {output.fq1_preproc}
-                    mv {params.outdir}/{wildcards.name}_no_rRNA_rev.fq.gz {output.fq2_preproc}
+                    mv {params.outdir}/{wildcards.name}_fwd.fq.gz {output.fq1_preproc}
+                    mv {params.outdir}/{wildcards.name}_rev.fq.gz {output.fq2_preproc}
 
-                    mv {params.outdir}/sortmerna/out/{wildcards.name}_rRNA.log \
+                    mv {params.outdir}/sortmerna/out/{wildcards.name}_removed.log \
                         {params.outdir}/sortmerna/out/{wildcards.name}_sortmerna.log
 
-                    echo 'Finished removing rRNA reads from '{wildcards.name}'' >> {log}
+                    echo 'Finished removing aligned reads from '{wildcards.name}'' >> {log}
                     '''
                 )
 
@@ -187,7 +187,7 @@ else:
             html = "fq_preprocessed/{name}_fastp.html"
         params:
             fastp_opt = config['run_rnaseq']['fastp_opt'],
-            rRNA_ref = config['run_rnaseq']['rRNA_ref'],
+            removal_ref = config['run_rnaseq']['removal_ref'],
             outdir = "fq_preprocessed"
         log: "logs/" + TIMESTAMP + "_{name}_preprocess_fq.log"
         threads: FASTP_THREADS
@@ -209,32 +209,32 @@ else:
                 echo 'Finished processing reads from '{wildcards.name}'' >> {log}
                 '''
             )
-            if params['rRNA_ref']:
+            if params['removal_ref']:
                 shell(
                     '''
-                    echo 'Removing rRNA reads from '{wildcards.name}'...' >> {log}
+                    echo 'Removing aligned reads from '{wildcards.name}'...' >> {log}
 
                     sortmerna \
                         --threads {threads} \
-                        --ref {params.rRNA_ref} \
+                        --ref {params.removal_ref} \
                         --reads {output.fq_preproc} \
                         --workdir {params.outdir}/sortmerna \
                         --kvdb {params.outdir}/sortmerna/{wildcards.name}_kvdb \
                         --readb {params.outdir}/sortmerna/{wildcards.name}_readb \
                         --fastx \
-                        --aligned {params.outdir}/sortmerna/out/{wildcards.name}_rRNA \
-                        --other {params.outdir}/{wildcards.name}_no_rRNA \
+                        --aligned {params.outdir}/sortmerna/out/{wildcards.name}_removed \
+                        --other {params.outdir}/{wildcards.name} \
                         &>> {log}
 
-                    mv {params.outdir}/sortmerna/out/{wildcards.name}_rRNA.fq.gz \
-                        {params.outdir}/sortmerna/out/{wildcards.name}_rRNA.fastq.gz
+                    mv {params.outdir}/sortmerna/out/{wildcards.name}_removed.fq.gz \
+                        {params.outdir}/sortmerna/out/{wildcards.name}_removed.fastq.gz
 
-                    mv {params.outdir}/{wildcards.name}_no_rRNA.fq.gz {output.fq_preproc}
+                    mv {params.outdir}/{wildcards.name}.fq.gz {output.fq_preproc}
 
-                    mv {params.outdir}/sortmerna/out/{wildcards.name}_rRNA.log \
+                    mv {params.outdir}/sortmerna/out/{wildcards.name}_removed.log \
                         {params.outdir}/sortmerna/out/{wildcards.name}_sortmerna.log
 
-                    echo 'Finished removing rRNA reads from '{wildcards.name}'' >> {log}
+                    echo 'Finished removing aligned reads from '{wildcards.name}'' >> {log}
                     '''
                 )
 
