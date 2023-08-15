@@ -19,7 +19,8 @@ from .opt_handler import (
     getref_config_set, getref_config_check,
     getfq_config_set, getfq_config_check,
     runqc_config_set, runqc_config_check,
-    run_rnaseq_config_set, run_rnaseq_config_check
+    run_rnaseq_config_set, run_rnaseq_config_check,
+    run_atacseq_config_set, run_atacseq_config_check
 )
 
 
@@ -63,7 +64,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command")
 
     # makeconfig subparser
-    makeconfig_msg = "Makes configuration file for tool execution."
+    makeconfig_msg = "Makes configuration file for fqseek execution."
     makeconfig_parser = subparsers.add_parser(
         "makeconfig", 
         parents=[parent], 
@@ -99,7 +100,8 @@ def main():
         required=False,
         help=(
             "Indicates which module to clear in the configuration file. "
-            "Available options are: init, getref, getfq, runqc, run_rnaseq, all."
+            "Available options are: init, getref, getfq, runqc, run_rnaseq, "
+            "run_atacseq, all."
         )
     )
     clearconfig_parser.add_argument(
@@ -112,7 +114,7 @@ def main():
 
 
     # init subparser
-    init_msg = "Initializes resources for alignment and kraken2 analysis."
+    init_msg = "Initializes resources for filtering, alignment processing and kraken2 analysis."
     init_parser = subparsers.add_parser(
         "init", 
         parents=[parent], 
@@ -137,7 +139,10 @@ def main():
         "--hisat2_gtf",
         type=str,
         required=False,
-        help="Path to reference annotation file."
+        help=(
+            "Path to reference annotation file. This includes exon and splice site "
+            "information for RNA-seq analysis. Requires ~160Gb RAM for human genome."
+        )
     )
     init_parser.add_argument(
         "--rrna_ref",
@@ -152,6 +157,12 @@ def main():
         default=None,
         required=False,
         help="Downloads exclusion list files to output directory."
+    )
+    init_parser.add_argument(
+        "--chr_sizes_ref",
+        type=str,
+        required=False,
+        help="Path to reference sequence file for retrieving chromosome sizes."
     )
     init_parser.add_argument(
         "--kallisto_ref",
@@ -604,6 +615,135 @@ def main():
         help="Performs a dry run without execution."
     )
 
+    # run_atacseq subparser
+    run_atacseq_msg = "Executes ATAC-seq module."
+    run_atacseq_parser = subparsers.add_parser(
+        "run_atacseq", 
+        parents=[parent], 
+        description=run_atacseq_msg, 
+        help=run_atacseq_msg, 
+        add_help=True
+    )
+
+    run_atacseq_parser.add_argument(
+        "-i",
+        "--indir",
+        type=str,
+        required=False,
+        help="Input directory containing fastq files."
+    )
+    run_atacseq_parser.add_argument(
+        "-f",
+        "--fastp_opt",
+        default="",
+        type=str,
+        required=False,
+        help=(
+            "Additional options for fastq file processing with fastp. Do not include "
+            "arguments: -i, -o, -I, -O, -j, -h."
+        )
+    )
+    run_atacseq_parser.add_argument(
+        "-x",
+        "--hisat2_ref",
+        default=None,
+        type=str,
+        required=False,
+        help="Path and basename of HISAT2 index files."
+    )
+    run_atacseq_parser.add_argument(
+        "-a",
+        "--hisat2_opt",
+        default="",
+        type=str,
+        required=False,
+        help=(
+            "Additional options for read alignment with HISAT2. Do not include "
+            "arguments: -x, -1, -2, -U, -S, --summary-file."
+        )
+    )
+    run_atacseq_parser.add_argument(
+        "-e",
+        "--exclusion_list",
+        default=None,
+        type=str,
+        required=False,
+        help="Path to genome exclusion list in bed format."
+    )
+    run_atacseq_parser.add_argument(
+        "-l",
+        "--chr_sizes",
+        default=None,
+        type=str,
+        required=False,
+        help="Path to tab-delimited file with chromosome sizes."
+    )
+    run_atacseq_parser.add_argument(
+        "-t",
+        "--tn5_shift",
+        action='store_true',
+        default=None,
+        required=False,
+        help="Adjusts read mapping for Tn5 transposase shift."
+    )
+    run_atacseq_parser.add_argument(
+        "-m",
+        "--genome_size",
+        default=None,
+        type=int,
+        required=False,
+        help=(
+            "Effective genome size. Reference values available at "
+            "https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html."
+        )
+    )
+    run_atacseq_parser.add_argument(
+        "-g",
+        "--gtf",
+        default=None,
+        type=str,
+        required=False,
+        help="Path to annotation file in gtf format."
+    )
+    run_atacseq_parser.add_argument(
+        "-o",
+        "--outdir",
+        default=".",
+        type=str,
+        required=False,
+        help="Output directory for files (default is current directory)."
+    )
+    run_atacseq_parser.add_argument(
+        "-j",
+        "--jobs",
+        default=1,
+        type=int,
+        required=False,
+        help="Maximum number of jobs/cores to use in parallel (default=1)."
+    )
+    run_atacseq_parser.add_argument(
+        "-c",
+        "--configfile",
+        type=str,
+        required=False,
+        help="Sets path to configuration file."
+    )
+    run_atacseq_parser.add_argument(
+        "-p",
+        "--profile",
+        type=str,
+        required=False,
+        help="Sets path to snakemake profile (useful for cluster execution)."
+    )
+    run_atacseq_parser.add_argument(
+        "-z",
+        "--dryrun",
+        action='store_true',
+        default=None,
+        required=False,
+        help="Performs a dry run without execution."
+    )
+
 
     args = parser.parse_args()
 
@@ -625,7 +765,8 @@ def main():
         "getref" : getref_parser,
         "getfq" : getfq_parser,
         "runqc" : runqc_parser,
-        "run_rnaseq" : run_rnaseq_parser
+        "run_rnaseq" : run_rnaseq_parser,
+        "run_atacseq" : run_atacseq_parser
     }
     if len(sys.argv) == 2 and sys.argv[1] in subparser_cmd_dict:
         if args.command != "makeconfig":
@@ -827,6 +968,37 @@ def main():
             cores = f"--cores {config['run_rnaseq']['jobs']}",
             snakefile = os.path.dirname(os.path.abspath(__file__))+"/workflow/rules/run_rnaseq.smk",
             directory = os.path.abspath(config['run_rnaseq']['outdir']),
+            configfile = os.path.abspath(args.configfile)
+        )
+
+        try:
+            subprocess.check_call(cmd, shell=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(e)
+            sys.exit(1)
+
+
+    if args.command == "run_atacseq":
+        
+        # Check inputs and update configuration
+        config = load_configfile(args.configfile)
+        config = run_atacseq_config_set(config, args)
+        run_atacseq_config_check(config)
+        update_configfile(args.configfile, config)
+
+        # Run run_atacseq workflow
+        profile = config['run_atacseq']['profile']
+        cmd = (
+            " snakemake {profile} {dryrun} {jobs} {cores} --snakefile {snakefile} "
+            " --directory {directory} --configfile {configfile} --nolock "
+            " --rerun-incomplete --rerun-triggers mtime --scheduler greedy "
+        ).format(
+            profile = f"--profile {profile}" if profile is not None else "",
+            dryrun = f"--dry-run" if args.dryrun else "",
+            jobs = f"--jobs {config['run_atacseq']['jobs']}",
+            cores = f"--cores {config['run_atacseq']['jobs']}",
+            snakefile = os.path.dirname(os.path.abspath(__file__))+"/workflow/rules/run_atacseq.smk",
+            directory = os.path.abspath(config['run_atacseq']['outdir']),
             configfile = os.path.abspath(args.configfile)
         )
 

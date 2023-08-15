@@ -55,6 +55,15 @@ def init_config_set(config, args):
             "is set in configuration! Using..."
         )
     
+    if config['init']['chr_sizes_ref'] is None:
+        if args.chr_sizes_ref:
+            config['init']['chr_sizes_ref'] = os.path.abspath(args.chr_sizes_ref)
+    else:
+        logger.warning(
+            f"Chromosome sizes reference file '{config['init']['chr_sizes_ref']}' "
+            "is set in configuration! Using..."
+        )
+    
     if config['init']['kallisto_ref'] is None: 
         if args.kallisto_ref:
             config['init']['kallisto_ref'] = os.path.abspath(args.kallisto_ref)
@@ -132,6 +141,12 @@ def init_config_check(config):
             logger.error(f"Annotation file '{config['init']['hisat2_gtf']}' not found.")
             sys.exit(1)
     
+    # Reference genome for chromosome sizes
+    if config['init']['chr_sizes_ref']:
+        if not os.path.exists(config['init']['chr_sizes_ref']):
+            logger.error(f"Chromosome sizes reference '{config['init']['chr_sizes_ref']}' not found.")
+            sys.exit(1)
+
     # kallisto index build
     if config['init']['kallisto_ref']:
         if not os.path.exists(config['init']['kallisto_ref']):
@@ -669,4 +684,199 @@ def run_rnaseq_config_check(config):
             logger.error(f"Snakemake profile '{config['run_rnaseq']['profile']}' not found.")
             sys.exit(1)
 
+
+#
+# run_atacseq module
+#
+def run_atacseq_config_set(config, args):
+    """ Sets parameters for run_atacseq module. """
+
+    if config['run_atacseq']['indir'] is None:
+        if args.indir:
+            config['run_atacseq']['indir'] = os.path.abspath(args.indir)
+    else:
+        logger.warning(
+            f"Input directory '{config['run_atacseq']['indir']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['fastp_opt'] is None:
+        config['run_atacseq']['fastp_opt'] = args.fastp_opt
+    else:
+        logger.warning(
+            f"fastp options '{config['run_atacseq']['fastp_opt']}' "
+            "are set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['hisat2_ref'] is None:
+        if args.hisat2_ref:
+            config['run_atacseq']['hisat2_ref'] = os.path.abspath(args.hisat2_ref)
+    else:
+        logger.warning(
+            f"HISAT2 index '{config['run_atacseq']['hisat2_ref']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['hisat2_opt'] is None:
+        config['run_atacseq']['hisat2_opt'] = args.hisat2_opt
+    else:
+        logger.warning(
+            f"HISAT2 options '{config['run_atacseq']['hisat2_opt']}' "
+            "are set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['exclusion_list'] is None:
+        if args.exclusion_list:
+            config['run_atacseq']['exclusion_list'] = os.path.abspath(args.exclusion_list)
+    else:
+        logger.warning(
+            f"Exclusion list '{config['run_atacseq']['exclusion_list']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['chr_sizes'] is None:
+        if args.chr_sizes:
+            config['run_atacseq']['chr_sizes'] = os.path.abspath(args.chr_sizes)
+    else:
+        logger.warning(
+            f"Chromosome size file '{config['run_atacseq']['chr_sizes']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['tn5_shift'] is None:
+        config['run_atacseq']['tn5_shift'] = args.tn5_shift
+    else:
+        logger.warning(
+            f"Tn5 shift '{config['run_atacseq']['tn5_shift']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['genome_size'] is None:
+        config['run_atacseq']['genome_size'] = args.genome_size
+    else:
+        logger.warning(
+            f"Effective genome size '{config['run_atacseq']['genome_size']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['gtf'] is None:
+        if args.gtf:
+            config['run_atacseq']['gtf'] = os.path.abspath(args.gtf)
+    else:
+        logger.warning(
+            f"Annotation file '{config['run_atacseq']['gtf']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['outdir'] is None:
+        config['run_atacseq']['outdir'] = os.path.abspath(args.outdir)
+    else:
+        logger.warning(
+            f"Outdir '{config['run_atacseq']['outdir']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['jobs'] is None:
+        config['run_atacseq']['jobs'] = args.jobs
+    else:
+        logger.warning(
+            f"Job/core number '{config['run_atacseq']['jobs']}' "
+            "is set in configuration! Using..."
+        )
+    
+    if config['run_atacseq']['profile'] is None:
+        if args.profile:
+            config['run_atacseq']['profile'] = os.path.abspath(args.profile)
+    else:
+        logger.warning(
+            f"Profile '{config['run_atacseq']['profile']}' "
+            "is set in configuration! Using..."
+        )
+    
+    return config
+
+
+def run_atacseq_config_check(config):
+    """ Evaluates input parameters for run_atacseq module. """
+
+    # Input directory
+    if config['run_atacseq']['indir'] is None:
+        logger.error("Missing fastq file input directory.")
+        sys.exit(1)
+    else:
+        if not os.path.exists(config['run_atacseq']['indir']):
+            logger.error(f"Input directory '{config['run_atacseq']['indir']}' not found.")
+            sys.exit(1)
+        elif not glob.glob(os.path.join(config['run_atacseq']['indir'], '*.f*q.gz')):
+            logger.error(f"No fastq files found in '{config['run_atacseq']['indir']}'.")
+            sys.exit(1)
+
+    # fastp options
+    blocked_opts = [
+        '-i', '--in1', '-o', '--out1', '-I', '--in2', '-O', '--out2', '-m', '--merge',
+        '--merged_out', '--include_unmerged', '--stdin', '--stdout', '--interleaved_in', 
+        '-j', '--json', '-h', '--html', '-s', '--split', '-S', '--split_by_lines', 
+        '-d', '--split_prefix_digits', '-?', '--help', '-v', '--version'
+    ]
+    if config['run_atacseq']['fastp_opt']:
+        fastp_opts = re.split('\s+', config['run_atacseq']['fastp_opt'])
+        for opt in fastp_opts:
+            if opt in blocked_opts:
+                logger.error(f"fastp option '{opt}' is not allowed.")
+                sys.exit(1)
+
+    # HISAT2 index and options
+    if config['run_atacseq']['hisat2_ref'] is None:
+        logger.error("Missing HISAT2 index.")
+        sys.exit(1)
+    else:
+        if not os.path.exists(config['run_atacseq']['hisat2_ref'] + '.1.ht2'):
+            logger.error(f"Missing HISAT2 index files at '{config['run_atacseq']['hisat2_ref']}'.")
+            sys.exit(1)
+    
+    blocked_opts = [
+        '-x', '-1', '-2', '-U', '-S', '--qseq', '-f', '-r', '-c', '--nofw', '--norc', 
+        '--rna-strandness', '--summary-file', '--version', '-h', '--help'
+    ]
+    if config['run_atacseq']['hisat2_opt']:
+        hisat2_opts = re.split('\s+', config['run_atacseq']['hisat2_opt'])
+        for opt in hisat2_opts:
+            if opt in blocked_opts:
+                logger.error(f"HISAT2 option '{opt}' is not allowed.")
+                sys.exit(1)
+    
+    # Exclusion list
+    if config['run_atacseq']['exclusion_list']:
+        if not os.path.exists(config['run_atacseq']['exclusion_list']):
+            logger.error(f"Exclusion list '{config['run_atacseq']['exclusion_list']}' not found.")
+            sys.exit(1)
+    
+    # Chromosome size file
+    if config['run_atacseq']['chr_sizes'] is None:
+        logger.error("Missing chromosome size file.")
+        sys.exit(1)
+    else:
+        if not os.path.exists(config['run_atacseq']['chr_sizes']):
+            logger.error(f"Chromosome size file '{config['run_atacseq']['chr_sizes']}' not found.")
+            sys.exit(1)
+
+    # Effective genome size
+    if config['run_atacseq']['genome_size'] is None:
+        logger.error("Missing effective genome size.")
+        sys.exit(1)
+
+    # Annotation
+    if config['run_atacseq']['gtf'] is None:
+        logger.error("Missing gene annotation file.")
+        sys.exit(1)
+    else:
+        if not os.path.exists(config['run_atacseq']['gtf']):
+            logger.error(f"Annotation file '{config['run_atacseq']['gtf']}' not found.")
+            sys.exit(1)
+    
+    # Profile
+    if config['run_atacseq']['profile']:
+        if not os.path.exists(config['run_atacseq']['profile']):
+            logger.error(f"Snakemake profile '{config['run_atacseq']['profile']}' not found.")
+            sys.exit(1)
 

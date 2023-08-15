@@ -254,7 +254,7 @@ if PAIRED:
             summary = "hisat2_aligned/{name}_hisat2_summary.txt",
             stats = "hisat2_aligned/{name}_stats.txt"
         params:
-            hisat2_ref = config['runqc']['hisat2_ref'],
+            hisat2_ref = config['run_rnaseq']['hisat2_ref'],
             hisat2_opt = config['run_rnaseq']['hisat2_opt']
         log: "logs/" + TIMESTAMP + "_{name}_hisat2_align.log"
         threads: HISAT2_THREADS
@@ -474,7 +474,7 @@ else:
             summary = "hisat2_aligned/{name}_hisat2_summary.txt",
             stats = "hisat2_aligned/{name}_stats.txt"
         params:
-            hisat2_ref = config['runqc']['hisat2_ref'],
+            hisat2_ref = config['run_rnaseq']['hisat2_ref'],
             hisat2_opt = config['run_rnaseq']['hisat2_opt']
         log: "logs/" + TIMESTAMP + "_{name}_hisat2_align.log"
         threads: HISAT2_THREADS
@@ -598,7 +598,7 @@ else:
             output:
                 h5 = "kallisto_transcript_abundance/{name}_abundance.h5",
                 tsv = "kallisto_transcript_abundance/{name}_abundance.tsv",
-                json = "kallisto_transcript_abundance/{name}_run_info.json",
+                json = "kallisto_transcript_abundance/{name}_run_info.json"
             params:
                 kallisto_opt = config['run_rnaseq']['kallisto_opt'],
                 frag_len = KALLISTO_FRAGMENT_LENGTH,
@@ -638,7 +638,7 @@ rule feature_counts:
         bams = expand(["hisat2_aligned/{name}.bam"], name=NAMES),
         gtf = config['run_rnaseq']['gtf']
     output:
-        featurecounts = "hisat2_aligned_featurecounts/" + PROJID + "_featurecounts.txt",
+        featurecounts = "hisat2_aligned_featurecounts/" + PROJID + "_featurecounts.txt"
     params:
         outdir = "hisat2_aligned_featurecounts"
     log: "logs/" + TIMESTAMP + "_feature_counts.log"
@@ -686,17 +686,20 @@ rule make_bedgraph:
     run:
         # calculate RPM scaling factor
         reads = subprocess.check_output(
-            f"samtools view -c {input}", 
+            f"samtools view -c {input.bam}", 
             shell=True, 
             text=True
         ).strip()
         scale_factor = 1e6/(int(reads)/2) if PAIRED else 1e6/int(reads)
+
+        pe = '-pc' if PAIRED else ''
 
         shell(
             '''
             echo 'Generating bedgraph for '{wildcards.name}'...' > {log}
 
             bedtools genomecov \
+                {pe} \
                 -bga \
                 -split \
                 -trackline \
@@ -740,11 +743,14 @@ if STRANDED:
             total_reads = int(reads_fwd) + int(reads_rev)
             scale_factor = 1e6/(total_reads/2) if PAIRED else 1e6/total_reads
 
+            pe = '-pc' if PAIRED else ''
+
             shell(
                 '''
                 echo 'Generating strand-specific bedgraph for '{wildcards.name}'...' > {log}
 
                 bedtools genomecov \
+                    {pe} \
                     -bga \
                     -split \
                     -trackline \
@@ -755,6 +761,7 @@ if STRANDED:
                     2>> {log}
                 
                 bedtools genomecov \
+                    {pe} \
                     -bga \
                     -split \
                     -trackline \

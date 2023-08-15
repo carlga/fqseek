@@ -25,6 +25,7 @@ init:
   hisat2_gtf:
   rrna_ref:
   exclusion_lists:
+  chr_sizes_ref:
   kallisto_ref:
   kallisto_index:
   kraken2_db_type:
@@ -83,6 +84,24 @@ run_rnaseq:
   hisat2_opt:
   kallisto_ref:
   kallisto_opt:
+  gtf:
+  outdir:
+  jobs:
+  profile:
+
+
+# -------------------
+# run_atacseq options
+# -------------------
+run_atacseq:
+  indir:
+  fastp_opt:
+  hisat2_ref:
+  hisat2_opt:
+  exclusion_list:
+  chr_sizes:
+  tn5_shift:
+  genome_size:
   gtf:
   outdir:
   jobs:

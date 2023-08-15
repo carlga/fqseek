@@ -70,7 +70,7 @@ def clear_configfile(configfile, module):
     """ Clears parameters of configuration file. """
 
     # Check module to clear
-    avail_modules = ['init', 'getref', 'getfq', 'runqc', 'run_rnaseq', 'all']
+    avail_modules = ['init', 'getref', 'getfq', 'runqc', 'run_rnaseq', 'run_atacseq', 'all']
 
     if module not in avail_modules:
         if module is None:
@@ -80,7 +80,7 @@ def clear_configfile(configfile, module):
         else:
             logger.error(
                 "Module is not valid! Choose from: 'init', 'getref', 'getfq', "
-                "'runqc', 'run_rnaseq', 'all'."
+                "'runqc', 'run_rnaseq', 'run_atacseq', 'all'."
             )
         sys.exit(1)
     

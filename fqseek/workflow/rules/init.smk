@@ -21,7 +21,7 @@ KRAKEN2_PLUSPFP16_LINK = 'https://genome-idx.s3.amazonaws.com/kraken/k2_pluspfp_
 
 # Set targets
 RUN_RULES = []
-INIT_HISAT2 = INIT_RIBORNA = INIT_EXCLUSIONLIST = INIT_KALLISTO = INIT_KRAKEN2 = None
+INIT_HISAT2 = INIT_RIBORNA = INIT_EXCLUSIONLIST = INIT_CHRSIZESREF = INIT_KALLISTO = INIT_KRAKEN2 = None
 
 if config["init"]["hisat2_ref"] and config["init"]["hisat2_index_base"]:
     INIT_HISAT2 = 'hisat2_index/' + config['init']['hisat2_index_base'] + '.1.ht2'
@@ -34,6 +34,10 @@ if config["init"]["rrna_ref"]:
 if config["init"]["exclusion_lists"]:
     INIT_EXCLUSIONLIST = 'exclusion_lists/exclusion_bed_files_complete'
     RUN_RULES.append(INIT_EXCLUSIONLIST)
+
+if config["init"]["chr_sizes_ref"]:
+    INIT_CHRSIZESREF = 'chromosome_sizes/' + os.path.basename(config["init"]["chr_sizes_ref"]) + '.sizes'
+    RUN_RULES.append(INIT_CHRSIZESREF)
 
 if config["init"]["kallisto_ref"] and config["init"]["kallisto_index"]:
     INIT_KALLISTO = 'kallisto_index/' + config['init']['kallisto_index']
@@ -51,7 +55,7 @@ if config["init"]["kraken2_db_type"] and config["init"]["bracken_read_len"]:
 
 # Distribute allocated jobs/cores
 AVAIL_THREADS = config['init']['jobs']
-INIT_HISAT2_THREADS = INIT_RIBORNA_THREADS = INIT_EXCLUSIONLIST_THREADS = INIT_KALLISTO_THREADS = INIT_KRAKEN2_THREADS = 0
+INIT_HISAT2_THREADS = INIT_RIBORNA_THREADS = INIT_EXCLUSIONLIST_THREADS = INIT_CHRSIZESREF_THREADS = INIT_KALLISTO_THREADS = INIT_KRAKEN2_THREADS = 0
 
 if INIT_RIBORNA:
     INIT_RIBORNA_THREADS = 1
@@ -59,6 +63,10 @@ if INIT_RIBORNA:
 
 if INIT_EXCLUSIONLIST:
     INIT_EXCLUSIONLIST_THREADS = 1
+    AVAIL_THREADS -= 1
+
+if INIT_CHRSIZESREF:
+    INIT_CHRSIZESREF_THREADS = 1
     AVAIL_THREADS -= 1
 
 if INIT_KALLISTO:
@@ -217,7 +225,6 @@ if INIT_EXCLUSIONLIST:
                 complete = temp(INIT_EXCLUSIONLIST)
             params:
                 links = EXCLUSIONLIST_LINKS,
-                filename = os.path.basename(RIBORNA_LINK),
                 outdir = 'exclusion_lists'
             log: "logs/" + TIMESTAMP + "_download_exclusion_lists.log"
             threads: INIT_EXCLUSIONLIST_THREADS
@@ -233,12 +240,44 @@ if INIT_EXCLUSIONLIST:
                         '''
                         curl -L {link} --remote-name --silent
                         gunzip {filename}
+                        sed -i 's/chr//g' {new_filename}
                         mv {new_filename} {params.outdir}/{new_filename}
                         '''
                     )
                 
                 shell(" echo 'Finished downloading exclusion lists' > {log} ")
                 shell(" touch {output.complete} ")
+
+
+#
+# Retrieve chromosome sizes from reference genome
+#
+if INIT_CHRSIZESREF:
+
+    rule get_chromosome_sizes:
+            """
+            Retrieves chromosome sizes.
+            """
+            input:
+                config['init']['chr_sizes_ref']
+            output:
+                INIT_CHRSIZESREF
+            params:
+                ref = os.path.basename(config['init']['chr_sizes_ref']),
+                outdir = "chromosome_sizes"
+            log: "logs/" + TIMESTAMP + "_get_chromosome_sizes.log"
+            threads: INIT_CHRSIZESREF_THREADS
+            # resources: cpus=4, mem_mb=4000, time_min=200
+            shell:
+                '''
+                echo 'Extracting chromosome sizes from reference file...' > {log}
+
+                samtools faidx {input} &>> {log}
+                awk '{{print $1"\t"$2}}' {input}.fai > {params.outdir}/{params.ref}.sizes
+                rm {input}.fai
+
+                echo 'Finished extracting chromosome sizes' >> {log}
+                '''
 
 
 #
