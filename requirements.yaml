@@ -29,5 +29,7 @@ dependencies:
   - sortmerna
   - samtools
   - bedtools
+  - deeptools
+  - macs2
   - subread >=2.0.2
   - multiqc
